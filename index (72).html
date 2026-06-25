@@ -1,0 +1,375 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="Pocket Taxes">
+<meta name="theme-color" content="#e8650a">
+<title>Pocket Taxes</title>
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+:root {
+  --orange:#e8650a; --orange-dark:#c45508; --orange-light:#fff3ed;
+  --teal:#1a7a7a; --teal-dark:#155f5f; --teal-light:#e8f5f5;
+  --blue:#2b7de9;
+  --gray-50:#f9fafb; --gray-100:#f0f2f5; --gray-200:#e2e8f0;
+  --gray-400:#94a3b8; --gray-500:#64748b; --gray-600:#475569; --gray-800:#1e293b;
+  --green:#16a34a; --green-dark:#14532d; --green-light:#dcfce7;
+  --red:#dc2626; --red-light:#fee2e2;
+  --warn:#ea580c; --warn-light:#fff7ed;
+  --r:12px; --rs:8px; --sh:0 2px 8px rgba(0,0,0,.08);
+}
+body { font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif; background:var(--gray-100); color:var(--gray-800); min-height:100vh; display:flex; flex-direction:column; max-width:480px; margin:0 auto; }
+.hdr { background:var(--orange); color:#fff; padding:12px 16px; display:flex; align-items:center; gap:10px; position:sticky; top:0; z-index:100; box-shadow:0 2px 14px rgba(232,101,10,.35); }
+.hdr-logo { width:44px; height:44px; border-radius:10px; overflow:hidden; background:rgba(255,255,255,.15); flex-shrink:0; border:1.5px solid rgba(255,255,255,.3); }
+.hdr-logo img { width:100%; height:100%; object-fit:cover; }
+.hdr-text h1 { font-size:19px; font-weight:800; letter-spacing:-.3px; line-height:1.1; color:#fff; }
+.hdr-sub { font-size:10px; color:rgba(255,255,255,.85); letter-spacing:.4px; text-transform:uppercase; margin-top:1px; }
+.hdr-fy { margin-left:auto; font-size:12px; background:rgba(255,255,255,.2); padding:4px 10px; border-radius:20px; font-weight:700; color:#fff; white-space:nowrap; border:1px solid rgba(255,255,255,.25); }
+.nav { background:#fff; display:flex; border-bottom:2px solid var(--gray-200); position:sticky; top:68px; z-index:90; }
+.ntab { flex:1; padding:10px 2px; text-align:center; font-size:11px; font-weight:700; color:var(--gray-400); cursor:pointer; border:none; background:none; border-bottom:2px solid transparent; margin-bottom:-2px; transition:all .15s; text-transform:uppercase; letter-spacing:.3px; }
+.ntab.active { color:var(--orange); border-bottom-color:var(--orange); }
+.ntab .ti { font-size:15px; display:block; margin-bottom:1px; }
+.content { padding:14px; flex:1; }
+.flabel { display:block; font-size:12px; font-weight:700; color:var(--gray-600); margin-bottom:4px; }
+.flabel .opt { font-weight:400; color:var(--gray-400); }
+.finput, .fselect { width:100%; padding:10px 12px; border:1.5px solid var(--gray-200); border-radius:var(--rs); font-size:14px; color:var(--gray-800); background:#fff; -webkit-appearance:none; appearance:none; }
+.finput:focus, .fselect:focus { outline:none; border-color:var(--orange); box-shadow:0 0 0 3px rgba(232,101,10,.12); }
+.frow { margin-bottom:10px; }
+.frow2 { display:grid; grid-template-columns:1fr 1fr; gap:10px; }
+.amt-wrap { position:relative; }
+.amt-wrap input { padding-left:28px !important; }
+.amt-pfx { position:absolute; left:11px; top:50%; transform:translateY(-50%); color:var(--gray-500); font-size:14px; font-weight:600; pointer-events:none; user-select:none; z-index:1; }
+.pct-wrap { position:relative; }
+.pct-wrap input { padding-right:30px !important; }
+.pct-sfx { position:absolute; right:11px; top:50%; transform:translateY(-50%); color:var(--gray-400); font-size:13px; pointer-events:none; }
+.gst-prev { background:#fff8f3; border:1.5px solid var(--orange); border-radius:var(--rs); padding:10px 14px; margin-top:8px; display:none; }
+.gst-prev.show { display:block; }
+.gp-row { display:flex; justify-content:space-between; font-size:13px; padding:2px 0; }
+.gp-row.total { border-top:1px solid rgba(232,101,10,.2); margin-top:4px; padding-top:6px; font-weight:800; color:var(--orange-dark); }
+.cbrow { display:flex; align-items:center; gap:10px; padding:10px 12px; background:var(--gray-50); border-radius:var(--rs); margin-bottom:8px; cursor:pointer; border:1.5px solid var(--gray-200); transition:all .15s; user-select:none; }
+.cbrow.on { background:#fff8f3; border-color:var(--orange); }
+.cbvis { width:20px; height:20px; border-radius:5px; border:2px solid var(--gray-300); display:flex; align-items:center; justify-content:center; flex-shrink:0; font-size:12px; background:#fff; transition:all .15s; }
+.cbrow.on .cbvis { background:var(--orange); border-color:var(--orange); color:#fff; }
+.cblbl { font-size:13px; font-weight:500; color:var(--gray-600); }
+.cbrow.on .cblbl { color:var(--orange-dark); font-weight:600; }
+.photoup { border:2px dashed var(--gray-200); border-radius:var(--rs); padding:14px; text-align:center; cursor:pointer; background:var(--gray-50); transition:all .15s; }
+.photoup:hover { border-color:var(--orange); background:#fff8f3; }
+.photoup.has { border-color:var(--green); background:var(--green-light); }
+.photoup .pic { font-size:26px; display:block; margin-bottom:4px; }
+.photoup p { font-size:12px; color:var(--gray-400); }
+.photoup.has p { color:var(--green); font-weight:700; }
+.prev-img { width:100%; max-height:120px; object-fit:cover; border-radius:6px; margin-top:8px; }
+input[type=file] { display:none; }
+.btn { display:inline-flex; align-items:center; justify-content:center; gap:7px; padding:11px 18px; border-radius:var(--rs); font-size:14px; font-weight:700; cursor:pointer; border:none; transition:all .15s; }
+.btn-p { background:var(--orange); color:#fff; } .btn-p:active { background:var(--orange-dark); }
+.btn-s { background:var(--blue); color:#fff; }
+.btn-g { background:var(--gray-100); color:var(--gray-600); border:1.5px solid var(--gray-200); }
+.btn-grn { background:var(--green-light); color:var(--green-dark); border:1.5px solid #86efac; }
+.btn-d { background:var(--red-light); color:var(--red); }
+.btn-f { width:100%; } .btn-sm { padding:7px 12px; font-size:12px; }
+.totbanner { border-radius:var(--r); padding:16px; margin-bottom:10px; display:flex; align-items:center; gap:12px; box-shadow:var(--sh); }
+.totbanner.inc { background:var(--green); color:#fff; }
+.totbanner.exp { background:var(--red); color:#fff; }
+.toti { font-size:28px; }
+.totinfo { flex:1; }
+.totlbl { font-size:11px; opacity:.8; text-transform:uppercase; letter-spacing:.4px; font-weight:600; }
+.totval { font-size:28px; font-weight:800; letter-spacing:-1px; line-height:1.1; }
+.totsub { font-size:12px; opacity:.85; margin-top:3px; }
+.totct { font-size:11px; background:rgba(255,255,255,.2); padding:3px 10px; border-radius:20px; font-weight:700; white-space:nowrap; align-self:flex-start; }
+.qbar { display:flex; gap:6px; margin-bottom:12px; }
+.qbtn { flex:1; padding:7px 4px; text-align:center; font-size:11px; font-weight:700; border-radius:var(--rs); cursor:pointer; border:1.5px solid var(--gray-200); background:#fff; color:var(--gray-600); transition:all .15s; line-height:1.3; }
+.qbtn.active { background:var(--orange); color:#fff; border-color:var(--orange); }
+.qbtn span { font-weight:400; font-size:9px; display:block; opacity:.75; }
+.elist { list-style:none; }
+.eitem { background:#fff; border-radius:var(--rs); padding:11px 13px; margin-bottom:8px; box-shadow:var(--sh); display:flex; align-items:flex-start; gap:10px; border-left:3px solid var(--gray-200); }
+.eitem.paid { border-left-color:var(--green); }
+.eitem.unpaid { border-left-color:var(--warn); }
+.einfo { flex:1; min-width:0; }
+.edesc { font-size:14px; font-weight:700; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.eref { font-size:11px; color:var(--gray-400); margin-top:1px; font-style:italic; }
+.edate { font-size:11px; color:var(--gray-400); margin-top:1px; }
+.etags { display:flex; gap:4px; flex-wrap:wrap; margin-top:5px; }
+.tag { font-size:10px; font-weight:700; padding:2px 7px; border-radius:20px; }
+.tg { background:#fff3ed; color:var(--orange-dark); }
+.tng { background:var(--gray-100); color:var(--gray-600); }
+.tcap { background:#e8f0fd; color:var(--blue); }
+.tpct { background:var(--warn-light); color:var(--warn); }
+.tpaid { background:var(--green-light); color:var(--green-dark); }
+.tunpaid { background:var(--warn-light); color:var(--warn); }
+.trec { background:#f0fdf4; color:var(--green); }
+.eacts { display:flex; gap:5px; margin-top:8px; flex-wrap:wrap; }
+.eamt { text-align:right; flex-shrink:0; }
+.eamt .av { font-size:15px; font-weight:800; }
+.eamt .ag { font-size:11px; color:var(--gray-400); margin-top:1px; }
+.bas-sec { background:#fff; border-radius:var(--r); padding:14px; margin-bottom:10px; box-shadow:var(--sh); }
+.bas-row { display:flex; justify-content:space-between; align-items:center; padding:8px 0; border-bottom:1px solid var(--gray-100); font-size:13px; }
+.bas-row:last-child { border-bottom:none; }
+.bc { font-size:10px; font-weight:800; background:var(--gray-100); padding:2px 6px; border-radius:4px; color:var(--gray-500); margin-right:6px; }
+.ba { font-weight:800; font-size:14px; }
+.bas-total { background:#fff8f3; margin:8px -14px -14px; padding:12px 14px; border-radius:0 0 var(--r) var(--r); display:flex; justify-content:space-between; align-items:center; font-size:14px; }
+.bas-total .ba { color:var(--orange-dark); font-size:17px; }
+.card { background:#fff; border-radius:var(--r); padding:14px; margin-bottom:10px; box-shadow:var(--sh); }
+.ctitle { font-size:12px; font-weight:800; text-transform:uppercase; letter-spacing:.6px; color:var(--orange); margin-bottom:12px; }
+.sgrid { display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-bottom:10px; }
+.sbox { background:#fff; border-radius:var(--rs); padding:12px; text-align:center; box-shadow:var(--sh); }
+.slbl { font-size:10px; color:var(--gray-400); font-weight:700; text-transform:uppercase; letter-spacing:.4px; }
+.sval { font-size:20px; font-weight:800; margin-top:2px; }
+.ssub { font-size:11px; color:var(--gray-400); margin-top:1px; }
+.alert { padding:11px 13px; border-radius:var(--rs); font-size:13px; margin-bottom:10px; font-weight:500; }
+.ai { background:#fff8f3; color:var(--orange-dark); border-left:3px solid var(--orange); }
+.aw { background:var(--warn-light); color:var(--warn); border-left:3px solid var(--warn); }
+.empty { text-align:center; padding:36px 16px; color:var(--gray-400); }
+.empty .ei { font-size:36px; margin-bottom:10px; }
+.empty p { font-size:13px; line-height:1.5; }
+.fab { position:fixed; bottom:22px; right:18px; width:52px; height:52px; background:var(--orange); color:#fff; border-radius:50%; border:none; cursor:pointer; font-size:26px; display:flex; align-items:center; justify-content:center; box-shadow:0 4px 16px rgba(232,101,10,.45); z-index:200; transition:all .15s; }
+.fab:active { background:var(--orange-dark); transform:scale(.96); }
+.overlay { position:fixed; inset:0; background:rgba(0,0,0,.5); display:flex; align-items:flex-end; z-index:300; opacity:0; pointer-events:none; transition:opacity .2s; }
+.overlay.open { opacity:1; pointer-events:all; }
+.modal { background:#fff; width:100%; border-radius:20px 20px 0 0; padding:18px 18px 40px; max-height:92vh; overflow-y:auto; transform:translateY(100%); transition:transform .25s ease-out; }
+.overlay.open .modal { transform:translateY(0); }
+.mhandle { width:40px; height:4px; background:var(--gray-200); border-radius:2px; margin:0 auto 14px; }
+.mtitle { font-size:17px; font-weight:800; margin-bottom:14px; }
+.toast { position:fixed; bottom:90px; left:50%; transform:translateX(-50%) translateY(20px); background:var(--gray-800); color:#fff; padding:10px 20px; border-radius:20px; font-size:13px; font-weight:600; z-index:500; opacity:0; transition:all .25s; pointer-events:none; white-space:nowrap; max-width:88vw; text-align:center; }
+.toast.show { opacity:1; transform:translateX(-50%) translateY(0); }
+.backup-card { background:#fff; border-radius:var(--r); padding:16px; margin-bottom:10px; box-shadow:var(--sh); border-top:3px solid var(--green); }
+.backup-title { font-size:14px; font-weight:800; color:var(--gray-800); margin-bottom:4px; }
+.backup-sub { font-size:12px; color:var(--gray-500); margin-bottom:4px; line-height:1.5; }
+.backup-note { font-size:11px; color:var(--gray-400); margin-bottom:12px; }
+.backup-btns { display:flex; flex-direction:column; gap:8px; }
+</style>
+</head>
+<body>
+
+<header class="hdr">
+  <div class="hdr-logo"><img src="data:image/png;base64,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" alt="Pocket Taxes"></div>
+  <div class="hdr-text">
+    <h1>Pocket Taxes</h1>
+    <div class="hdr-sub">Because taxes are such fun</div>
+  </div>
+  <div class="hdr-fy">FY 2025&#8211;26</div>
+</header>
+
+<nav class="nav">
+  <button class="ntab active" onclick="switchTab('income')" id="tab-income"><span class="ti">&#x1F4B0;</span>Income</button>
+  <button class="ntab" onclick="switchTab('expenses')" id="tab-expenses"><span class="ti">&#x1F9FE;</span>Expenses</button>
+  <button class="ntab" onclick="switchTab('bas')" id="tab-bas"><span class="ti">&#x1F4CB;</span>BAS</button>
+  <button class="ntab" onclick="switchTab('tax')" id="tab-tax"><span class="ti">&#x1F1E6;&#x1F1FA;</span>Tax</button>
+</nav>
+
+<div class="content" id="main-content"></div>
+<button class="fab" id="fab" onclick="openModal()">+</button>
+<div class="overlay" id="overlay" onclick="closeOnBg(event)">
+  <div class="modal"><div class="mhandle"></div><div id="modal-content"></div></div>
+</div>
+<div class="toast" id="toast"></div>
+
+<script>
+// ===== STATE =====
+var S={tab:"income",income:[],expenses:[],wpm:{},q:getCurrentQuarter()};
+try{var p=JSON.parse(localStorage.getItem("ptv7")||"{}");S.income=p.income||[];S.expenses=p.expenses||[];S.wpm=p.wpm||{};}catch(e){}
+function save(){try{localStorage.setItem("ptv7",JSON.stringify({income:S.income,expenses:S.expenses,wpm:S.wpm}));}catch(e){}}
+function genId(){return Date.now().toString(36)+Math.random().toString(36).slice(2);}
+function getCurrentQuarter(){var m=new Date().getMonth()+1;if(m>=7&&m<=9)return"Q1";if(m>=10&&m<=12)return"Q2";if(m>=1&&m<=3)return"Q3";return"Q4";}
+function eQ(d){if(!d)return null;var m=new Date(d+"T00:00:00").getMonth()+1;if(m>=7&&m<=9)return"Q1";if(m>=10&&m<=12)return"Q2";if(m>=1&&m<=3)return"Q3";return"Q4";}
+function qE(arr){return arr.filter(function(e){return eQ(e.date)===S.q;});}
+function esc(s){return String(s||"").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");}
+function fmtD(s){if(!s)return"";return new Date(s+"T00:00:00").toLocaleDateString("en-AU",{day:"numeric",month:"short",year:"numeric"});}
+function fmtA(n){return"$"+Number(n||0).toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g,",");}
+function iGST(e){return e.gst?Number(e.netAmount)*0.1:0;}
+function iTotal(e){return e.gst?Number(e.netAmount)*1.1:Number(e.netAmount);}
+function xGST(e){return e.gst?effAmt(e)/11:0;}
+function effAmt(e){var b=Number(e.amount);return(e.wp&&e.wp<100)?b*e.wp/100:b;}
+function fmtBytes(b){if(b<1024)return b+"B";if(b<1048576)return(b/1024).toFixed(0)+"KB";return(b/1048576).toFixed(1)+"MB";}
+function toast(msg,dur){var t=document.getElementById("toast");t.textContent=msg;t.classList.add("show");setTimeout(function(){t.classList.remove("show");},dur||2800);}
+
+// ===== TABS =====
+function switchTab(t){
+  S.tab=t;
+  document.querySelectorAll(".ntab").forEach(function(n){n.classList.remove("active");});
+  document.getElementById("tab-"+t).classList.add("active");
+  document.getElementById("fab").style.display=(t==="income"||t==="expenses")?"flex":"none";
+  render();
+}
+function qBar(){return'<div class="qbar">'+[["Q1","Jul&#8211;Sep"],["Q2","Oct&#8211;Dec"],["Q3","Jan&#8211;Mar"],["Q4","Apr&#8211;Jun"]].map(function(x){return'<button class="qbtn'+(S.q===x[0]?" active":"")+'" onclick="setQ(\'"+x[0]+"\')">"+x[0]+'<span>'+x[1]+"</span></button>";}).join("")+"</div>";}
+function setQ(q){S.q=q;render();}
+function render(){
+  var el=document.getElementById("main-content");
+  if(S.tab==="income")el.innerHTML=renderIncome();
+  else if(S.tab==="expenses")el.innerHTML=renderExpenses();
+  else if(S.tab==="bas")el.innerHTML=renderBAS();
+  else el.innerHTML=renderTax();
+}
+
+// ===== INCOME =====
+function renderIncome(){
+  var qe=qE(S.income);
+  var tot=qe.reduce(function(s,e){return s+iTotal(e);},0);
+  var totGST=qe.reduce(function(s,e){return s+iGST(e);},0);
+  var totNet=qe.reduce(function(s,e){return s+Number(e.netAmount);},0);
+  var unpaid=qe.filter(function(e){return!e.paid;}).reduce(function(s,e){return s+iTotal(e);},0);
+  var items=qe.length?qe.map(function(e){return '<li class="eitem '+(e.paid?"paid":"unpaid")+'"><div class="einfo"><div class="edesc">'+esc(e.desc)+"</div>"+(e.ref?'<div class="eref">Ref: '+esc(e.ref)+"</div>":"")+'<div class="edate">'+fmtD(e.date)+'</div><div class="etags"><span class="tag '+(e.gst?"tg":"tng")+"">"+(e.gst?"+ GST":"No GST")+"</span>"+(e.paid?'<span class="tag tpaid">&#x2713; Paid</span>':'<span class="tag tunpaid">Unpaid</span>')+'</div><div class="eacts"><button class="btn btn-g btn-sm" onclick="togglePaid(\'income\',\''+ e.id+'\')">'+(e.paid?"&#x2713; Paid":"Mark Paid")+"</button>"+'<button class="btn btn-d btn-sm" onclick="del(\'income\',\''+ e.id+'\')">Delete</button></div></div><div class="eamt"><div class="av">'+fmtA(iTotal(e))+"</div>"+(e.gst?'<div class="ag">Net '+fmtA(e.netAmount)+'</div><div class="ag">GST '+fmtA(iGST(e))+"</div>":"")+"</div></li>";}).join(""):'<div class="empty"><div class="ei">&#x1F4B0;</div><p>No income this quarter.<br>Tap <strong>+</strong> to add.</p></div>';
+  return qBar()+'<div class="totbanner inc"><div class="toti">&#x1F4B0;</div><div class="totinfo"><div class="totlbl">Total Income (inc. GST) &middot; '+S.q+'</div><div class="totval">'+fmtA(tot)+'</div><div class="totsub">Net: '+fmtA(totNet)+" &middot; GST: "+fmtA(totGST)+"</div>"+(unpaid>0?'<div class="totsub">Unpaid: '+fmtA(unpaid)+"</div>":"")+"</div>"+'<div class="totct">'+qe.length+' entries</div></div><ul class="elist">'+items+"</ul>";
+}
+
+// ===== EXPENSES =====
+function renderExpenses(){
+  var qe=qE(S.expenses);
+  var tot=qe.reduce(function(s,e){return s+effAmt(e);},0);
+  var totGST=qe.reduce(function(s,e){return s+xGST(e);},0);
+  var items=qe.length?qe.map(function(e){var ef=effAmt(e);return'<li class="eitem '+(e.paid?"paid":"unpaid")+'"><div class="einfo"><div class="edesc">'+esc(e.desc)+'</div><div class="edate">'+fmtD(e.date)+'</div><div class="etags"><span class="tag '+(e.gst?"tg":"tng")+"">"+(e.gst?"GST Inc.":"No GST")+"</span>"+(e.cap?'<span class="tag tcap">Capital</span>':"")+  (e.wp&&e.wp<100?'<span class="tag tpct">'+e.wp+"% work</span>":"")+  (e.receipt?'<span class="tag trec">&#x1F4F7; Receipt</span>':"")+(e.paid?'<span class="tag tpaid">&#x2713; Paid</span>':'<span class="tag tunpaid">Unpaid</span>')+'</div><div class="eacts"><button class="btn btn-g btn-sm" onclick="togglePaid(\'expenses\',\''+ e.id+'\')">'+(e.paid?"&#x2713; Paid":"Mark Paid")+"</button>"+(e.receipt?'<button class="btn btn-g btn-sm" onclick="viewReceipt(\''+ e.id+'\')">&#x1F4F7; View</button>':"")+'<button class="btn btn-d btn-sm" onclick="del(\'expenses\',\''+ e.id+'\')">Delete</button></div></div><div class="eamt"><div class="av">'+fmtA(ef)+"</div>"+(e.wp&&e.wp<100?'<div class="ag">of '+fmtA(e.amount)+"</div>":"")+(e.gst?'<div class="ag">GST '+fmtA(xGST(e))+"</div>":"")+"</div></li>";}).join(""):'<div class="empty"><div class="ei">&#x1F9FE;</div><p>No expenses this quarter.<br>Tap <strong>+</strong> to add.</p></div>';
+  return qBar()+'<div class="totbanner exp"><div class="toti">&#x1F9FE;</div><div class="totinfo"><div class="totlbl">Total Expenses &middot; '+S.q+'</div><div class="totval">'+fmtA(tot)+'</div><div class="totsub">GST credits: '+fmtA(totGST)+"</div></div>"+'<div class="totct">'+qe.length+'entries</div></div><ul class="elist">'+items+"</ul>";
+}
+
+function viewReceipt(id){var e=S.expenses.find(function(x){return x.id===id;});if(!e||!e.receipt)return;var w=window.open("","_blank");w.document.write('<html><body style="margin:0;background:#000;display:flex;align-items:center;justify-content:center;min-height:100vh"><img src="'+e.receipt+'" style="max-width:100%;max-height:100vh;object-fit:contain"></body></html>');}
+
+// ===== BAS =====
+function renderBAS(){
+  var qi=qE(S.income).filter(function(e){return e.paid;}),qx=qE(S.expenses).filter(function(e){return e.paid;});
+  var unpaidI=qE(S.income).filter(function(e){return!e.paid;}).length,unpaidX=qE(S.expenses).filter(function(e){return!e.paid;}).length;
+  var salesIncGST=qi.reduce(function(s,e){return s+iTotal(e);},0);
+  var gstC=qi.reduce(function(s,e){return s+iGST(e);},0);
+  var noGSTSales=qi.filter(function(e){return!e.gst;}).reduce(function(s,e){return s+Number(e.netAmount);},0);
+  var expTot=qx.reduce(function(s,e){return s+effAmt(e);},0);
+  var gstCred=qx.reduce(function(s,e){return s+xGST(e);},0);
+  var capEx=qx.filter(function(e){return e.cap;}).reduce(function(s,e){return s+effAmt(e);},0);
+  var net=gstC-gstCred;
+  var ql={Q1:"Jul&#8211;Sep 2025",Q2:"Oct&#8211;Dec 2025",Q3:"Jan&#8211;Mar 2026",Q4:"Apr&#8211;Jun 2026"};
+  return qBar()+'<div class="alert ai">&#x1F4CB; BAS for <strong>'+S.q+" &middot; "+ql[S.q]+"</strong> &mdash; paid entries only</div>"+(unpaidI>0||unpaidX>0?'<div class="alert aw">&#x26A0;&#xFE0F; '+unpaidI+" income + "+unpaidX+" expense entries unpaid &mdash; excluded from BAS.</div>":"")+'<div class="bas-sec"><div class="ctitle">&#x1F7E2; Sales</div><div class="bas-row"><div><span class="bc">G1</span>Total sales (inc. GST)</div><div class="ba">'+fmtA(salesIncGST)+'</div></div><div class="bas-row"><div><span class="bc">G3</span>GST-free sales</div><div class="ba">'+fmtA(noGSTSales)+'</div></div><div class="bas-row"><div><span class="bc">1A</span><strong>GST on sales</strong></div><div class="ba" style="color:var(--orange-dark)">'+fmtA(gstC)+'</div></div></div><div class="bas-sec"><div class="ctitle">&#x1F534; Purchases</div><div class="bas-row"><div><span class="bc">G10</span>Capital purchases</div><div class="ba">'+fmtA(capEx)+'</div></div><div class="bas-row"><div><span class="bc">G11</span>Non-capital purchases</div><div class="ba">'+fmtA(expTot-capEx)+'</div></div><div class="bas-row"><div><span class="bc">1B</span><strong>GST credits</strong></div><div class="ba" style="color:var(--green)">'+fmtA(gstCred)+'</div></div></div><div class="bas-sec"><div class="ctitle">&#x1F4B3; Net GST</div><div class="bas-row"><div>GST collected (1A)</div><div class="ba">'+fmtA(gstC)+'</div></div><div class="bas-row"><div>GST credits (1B)</div><div class="ba" style="color:var(--green)">&ndash; '+fmtA(gstCred)+'</div></div><div class="bas-total"><strong>'+(net>=0?"&#x1F4B8; GST to Pay ATO":"&#x1F4B0; GST Refund")+"</strong><div class="ba">"+fmtA(Math.abs(net))+"</div></div></div>"+'<button class="btn btn-s btn-f" style="margin-bottom:10px" onclick="goURL(\'https://my.gov.au\',\'Opening MyGov...\')">&#x1F3DB;&#xFE0F; Open MyGov BAS Portal</button><button class="btn btn-g btn-f" onclick="copyBAS()">&#x1F4CB; Copy BAS Summary</button>';
+}
+
+function goURL(url,msg){toast(msg);setTimeout(function(){window.open(url,"_blank");},400);}
+function copyBAS(){
+  var qi=qE(S.income).filter(function(e){return e.paid;}),qx=qE(S.expenses).filter(function(e){return e.paid;});
+  var sales=qi.reduce(function(s,e){return s+iTotal(e);},0),gstC=qi.reduce(function(s,e){return s+iGST(e);},0);
+  var expTot=qx.reduce(function(s,e){return s+effAmt(e);},0),gstCred=qx.reduce(function(s,e){return s+xGST(e);},0);
+  var net=gstC-gstCred;
+  var txt="POCKET TAXES - BAS "+S.q+" (paid only)\nG1 Total Sales (inc GST): "+fmtA(sales)+"\n1A GST on Sales: "+fmtA(gstC)+"\nG11 Purchases: "+fmtA(expTot)+"\n1B GST Credits: "+fmtA(gstCred)+"\nNET GST "+(net>=0?"PAYABLE":"REFUND")+": "+fmtA(Math.abs(net));
+  navigator.clipboard.writeText(txt).then(function(){toast("\u2713 BAS copied!");}).catch(function(){var ta=document.createElement("textarea");ta.value=txt;document.body.appendChild(ta);ta.select();document.execCommand("copy");document.body.removeChild(ta);toast("\u2713 BAS copied!");});
+}
+
+// ===== TAX =====
+function calcTax(inc){if(inc<=0)return 0;var t=0;if(inc<=18200)t=0;else if(inc<=45000)t=(inc-18200)*.19;else if(inc<=120000)t=5092+(inc-45000)*.325;else if(inc<=180000)t=29467+(inc-120000)*.37;else t=51667+(inc-180000)*.45;return Math.max(0,t+inc*.02);}
+
+function renderTax(){
+  var ai=S.income.filter(function(e){return e.paid;}),ax=S.expenses.filter(function(e){return e.paid;});
+  var unpaidI=S.income.filter(function(e){return!e.paid;}).length,unpaidX=S.expenses.filter(function(e){return!e.paid;}).length;
+  var netInc=ai.reduce(function(s,e){return s+Number(e.netAmount);},0);
+  var netExp=ax.reduce(function(s,e){return s+effAmt(e)-xGST(e);},0);
+  var taxable=netInc-netExp,tax=calcTax(taxable);
+  var caps=ax.filter(function(e){return e.cap;});
+  var totalIncGST=ai.reduce(function(s,e){return s+iTotal(e);},0),gstCollected=ai.reduce(function(s,e){return s+iGST(e);},0);
+  var photoCount=S.expenses.filter(function(e){return e.receipt;}).length;
+  var dataStr=JSON.stringify({income:S.income,expenses:S.expenses,wpm:S.wpm});
+  var dataSize=new Blob([dataStr]).size;
+  return '<div class="alert ai">&#x1F4CA; Full year &mdash; FY 2025&#8211;26 &middot; paid entries only</div>'+(unpaidI>0||unpaidX>0?'<div class="alert aw">&#x26A0;&#xFE0F; '+unpaidI+" income + "+unpaidX+" expense entries unpaid &mdash; excluded.</div>":"")+'<div class="sgrid"><div class="sbox"><div class="slbl">Net Income</div><div class="sval" style="color:var(--green)">'+fmtA(netInc)+'</div><div class="ssub">ex. GST</div></div><div class="sbox"><div class="slbl">Net Expenses</div><div class="sval" style="color:var(--red)">'+fmtA(netExp)+'</div><div class="ssub">ex. GST</div></div></div><div class="card"><div class="ctitle">&#x1F4C8; Taxable Income</div><div class="bas-row"><div>Gross sales (inc. GST)</div><div class="ba">'+fmtA(totalIncGST)+'</div></div><div class="bas-row"><div>Less GST collected</div><div class="ba" style="color:var(--gray-400)">&ndash; '+fmtA(gstCollected)+'</div></div><div class="bas-row"><div>Less deductible expenses</div><div class="ba" style="color:var(--red)">&ndash; '+fmtA(netExp)+'</div></div><div class="bas-row" style="border-top:2px solid var(--gray-200);margin-top:4px;padding-top:10px"><div><strong>Taxable income</strong></div><div class="ba" style="color:var(--orange-dark);font-size:17px">'+fmtA(taxable)+'</div></div></div><div class="card"><div class="ctitle">&#x1F9EE; Estimated Tax</div><div class="bas-row"><div>Income tax</div><div class="ba">'+fmtA(tax-Math.max(0,taxable*.02))+'</div></div><div class="bas-row"><div>Medicare levy (2%)</div><div class="ba">'+fmtA(Math.max(0,taxable*.02))+'</div></div><div class="bas-total"><strong>Est. tax payable</strong><div class="ba">'+fmtA(tax)+'</div></div><p style="font-size:11px;color:var(--gray-400);margin-top:10px">&#x26A0;&#xFE0F; Estimate only. FY2025&#8211;26 resident sole trader rates. Consult your accountant.</p></div>'+(caps.length?'<div class="card"><div class="ctitle">&#x1F3D7;&#xFE0F; Capital Items</div>'+caps.map(function(e){return'<div class="bas-row"><div>'+esc(e.desc)+'</div><div class="ba">'+fmtA(effAmt(e))+"</div></div>";}).join("")+'<p style="font-size:11px;color:var(--gray-400);margin-top:8px">May require depreciation schedules.</p></div>':"")+ '<button class="btn btn-s btn-f" style="margin-bottom:10px" onclick="goURL(\'https://my.gov.au\',\'Opening MyGov...\')">&#x1F1E6;&#x1F1FA; Lodge Tax Return on MyGov</button><button class="btn btn-g btn-f" style="margin-bottom:14px" onclick="copyTax()">&#x1F4CB; Copy Tax Summary</button>'+'<div class="backup-card"><div class="backup-title">&#x1F4BE; Backup &amp; Restore</div><div class="backup-sub">All data including receipt photos saved in one file. Store on Google Drive, iCloud, or email to yourself.</div><div class="backup-note">&#x1F4E6; Data: '+S.income.length+" income + "+S.expenses.length+" expenses &middot; "+photoCount+" receipt photo"+(photoCount!==1?"s":"")+" &middot; ~"+fmtBytes(dataSize)+'</div><div class="backup-btns"><button class="btn btn-grn btn-f" onclick="downloadBackup()">&#x2B07;&#xFE0F; Download Full Backup (inc. photos)</button><label class="btn btn-g btn-f" style="cursor:pointer;justify-content:center">&#x2B06;&#xFE0F; Restore from Backup<input type="file" accept=".json" onchange="restoreBackup(this)"></label></div></div>';
+}
+
+function copyTax(){
+  var ai=S.income.filter(function(e){return e.paid;}),ax=S.expenses.filter(function(e){return e.paid;});
+  var netInc=ai.reduce(function(s,e){return s+Number(e.netAmount);},0);
+  var netExp=ax.reduce(function(s,e){return s+effAmt(e)-xGST(e);},0);
+  var tax=calcTax(netInc-netExp);
+  var txt="POCKET TAXES - FY2025-26 Tax Summary\nNet Income (ex GST): "+fmtA(netInc)+"\nDeductible Expenses: "+fmtA(netExp)+"\nTaxable Income: "+fmtA(netInc-netExp)+"\nEst. Tax Payable: "+fmtA(tax);
+  navigator.clipboard.writeText(txt).then(function(){toast("\u2713 Tax summary copied!");}).catch(function(){var ta=document.createElement("textarea");ta.value=txt;document.body.appendChild(ta);ta.select();document.execCommand("copy");document.body.removeChild(ta);toast("\u2713 Tax summary copied!");});
+}
+
+// ===== BACKUP =====
+function downloadBackup(){
+  var data={version:2,app:"Pocket Taxes",exported:new Date().toISOString(),income:S.income,expenses:S.expenses,wpm:S.wpm};
+  var json=JSON.stringify(data,null,2);
+  var blob=new Blob([json],{type:"application/json"});
+  var url=URL.createObjectURL(blob);
+  var a=document.createElement("a");
+  a.href=url;
+  a.download="pocket-taxes-backup-"+new Date().toISOString().slice(0,10)+".json";
+  a.click();
+  URL.revokeObjectURL(url);
+  var pc=S.expenses.filter(function(e){return e.receipt;}).length;
+  var mb=(new Blob([json]).size/1048576).toFixed(1);
+  toast("\u2713 Backup downloaded — "+pc+" receipts included ("+mb+"MB)",3500);
+}
+function restoreBackup(input){
+  if(!input.files.length)return;
+  var reader=new FileReader();
+  reader.onload=function(e){
+    try{
+      var data=JSON.parse(e.target.result);
+      if(!Array.isArray(data.income)||!Array.isArray(data.expenses)){toast("\u26A0\uFE0F Invalid backup file");return;}
+      var expDate=data.exported?new Date(data.exported).toLocaleDateString("en-AU"):"unknown date";
+      var pc=(data.expenses||[]).filter(function(x){return x.receipt&&x.receipt!=="[photo-removed-from-backup]";}).length;
+      if(!confirm("Restore backup from "+expDate+"?\n\u2022 "+data.income.length+" income entries\n\u2022 "+data.expenses.length+" expense entries\n\u2022 "+pc+" receipt photos\n\nThis will REPLACE all current data."))return;
+      S.income=data.income||[];S.expenses=data.expenses||[];S.wpm=data.wpm||{};
+      save();render();
+      toast("\u2713 Restored! "+S.income.length+" income, "+S.expenses.length+" expenses, "+pc+" photos",3500);
+    }catch(err){toast("\u26A0\uFE0F Could not read backup file");}
+  };
+  reader.readAsText(input.files[0]);
+  input.value="";
+}
+
+// ===== ACTIONS =====
+function togglePaid(type,id){var e=S[type].find(function(x){return x.id===id;});if(e){e.paid=!e.paid;save();render();}}
+function del(type,id){if(!confirm("Delete this entry?"))return;S[type]=S[type].filter(function(x){return x.id!==id;});save();render();}
+
+// ===== MODAL =====
+var photoData=null,pctOn=false;
+function openModal(){
+  photoData=null;pctOn=false;
+  document.getElementById("modal-content").innerHTML=S.tab==="income"?incomeForm():expenseForm();
+  var di=document.getElementById("f-date");
+  if(di&&!di.value)di.value=new Date().toISOString().slice(0,10);
+  document.getElementById("overlay").classList.add("open");
+}
+function closeModal(){document.getElementById("overlay").classList.remove("open");}
+function closeOnBg(e){if(e.target===document.getElementById("overlay"))closeModal();}
+function tog(cbId,rowId){var cb=document.getElementById(cbId),row=document.getElementById(rowId);if(!cb||!row)return;cb.checked=!cb.checked;row.classList.toggle("on",cb.checked);}
+
+// ===== INCOME FORM =====
+function incomeForm(){
+  return '<div class="mtitle">&#x2795; Add Income</div><div class="frow"><label class="flabel">Date</label><input class="finput" type="date" id="f-date"></div><div class="frow"><label class="flabel">Description</label><input class="finput" type="text" id="f-desc" placeholder="e.g. Invoice #001 &#x2014; Client Name"></div><div class="frow"><label class="flabel">Reference <span class="opt">(optional)</span></label><input class="finput" type="text" id="f-ref" placeholder="e.g. INV-001, Job #23"></div><div class="frow2"><div class="frow" style="margin-bottom:0"><label class="flabel">Net Amount (ex-GST)</label><div class="amt-wrap"><span class="amt-pfx">$</span><input class="finput" type="number" id="f-amt" min="0" step="0.01" placeholder="0.00" oninput="updateGSTPrev()"></div></div><div class="frow" style="margin-bottom:0"><label class="flabel">GST</label><select class="fselect" id="f-gst" onchange="updateGSTPrev()"><option value="yes">+ Add GST</option><option value="no">No GST</option></select></div></div><div class="gst-prev" id="gst-prev"><div class="gp-row"><span style="color:var(--gray-600)">Net amount</span><span id="pv-net">$0.00</span></div><div class="gp-row"><span style="color:var(--gray-600)">GST (10%)</span><span id="pv-gst">$0.00</span></div><div class="gp-row total"><span>Total to client</span><span id="pv-tot">$0.00</span></div></div><div style="margin-top:14px"><div class="cbrow" id="row-paid" onclick="tog(\'cb-paid\',\'row-paid\')"><div class="cbvis">&#x2713;</div><span class="cblbl">Mark as Paid</span></div></div><div style="height:14px"></div><button class="btn btn-p btn-f" onclick="saveIncome()">Save Income</button>';
+}
+function updateGSTPrev(){
+  var amt=parseFloat(document.getElementById("f-amt")&&document.getElementById("f-amt").value)||0;
+  var gst=document.getElementById("f-gst")&&document.getElementById("f-gst").value==="yes";
+  var prev=document.getElementById("gst-prev");if(!prev)return;
+  if(amt>0){prev.classList.add("show");var g=gst?amt*0.1:0;document.getElementById("pv-net").textContent=fmtA(amt);document.getElementById("pv-gst").textContent=fmtA(g);document.getElementById("pv-tot").textContent=fmtA(amt+g);}
+  else prev.classList.remove("show");
+}
+function saveIncome(){
+  var date=document.getElementById("f-date").value,desc=document.getElementById("f-desc").value.trim();
+  var ref=document.getElementById("f-ref").value.trim(),netAmount=document.getElementById("f-amt").value;
+  var gst=document.getElementById("f-gst").value==="yes",paid=document.getElementById("cb-paid")&&document.getElementById("cb-paid").checked||false;
+  if(!date||!desc||!netAmount){toast("\u26A0\uFE0F Fill in Date, Description and Amount");return;}
+  S.income.push({id:genId(),date:date,desc:desc,ref:ref,netAmount:Number(netAmount),gst:gst,paid:paid});
+  save();closeModal();render();toast("\u2713 Income saved");
+}
+
+// ===== EXPENSE FORM =====
+function expenseForm(){
+  var keys=Object.keys(S.wpm);
+  var dl=keys.length?"<datalist id=\"dl-desc\">"+keys.map(function(k){return'<option value="'+esc(k)+'">';}).join("")+"</datalist>":"";
+  return dl+'<div class="mtitle">&#x2795; Add Expense</div><div class="frow"><label class="flabel">Date</label><input class="finput" type="date" id="f-date"></div><div class="frow"><label class="flabel">Description</label><input class="finput" type="text" id="f-desc" placeholder="e.g. Power bill, Fuel" list="dl-desc" oninput="onDesc(this.value)"></div><div class="frow2"><div class="frow" style="margin-bottom:0"><label class="flabel">Amount (inc. GST)</label><div class="amt-wrap"><span class="amt-pfx">$</span><input class="finput" type="number" id="f-amt" min="0" step="0.01" placeholder="0.00"></div></div><div class="frow" style="margin-bottom:0"><label class="flabel">GST</label><select class="fselect" id="f-gst"><option value="yes">Inc. GST</option><option value="no">No GST</option></select></div></div><div style="margin-top:14px"><div class="cbrow" id="row-cap" onclick="tog(\'cb-cap\',\'row-cap\')"><div class="cbvis">&#x2713;</div><span class="cblbl">Capital item (asset/equipment)</span></div><div class="cbrow" id="row-pct" onclick="togPct()"><div class="cbvis" id="vis-pct">&#x2713;</div><span class="cblbl">Partial work use (%)</span></div><div id="pct-wrap" style="display:none;margin-top:2px;padding:10px 12px;background:#fff8f3;border-radius:var(--rs);border:1.5px solid var(--orange)"><label class="flabel">Work use %</label><div class="pct-wrap"><input class="finput" type="number" id="f-pct" min="1" max="100" placeholder="e.g. 34"><span class="pct-sfx">%</span></div><p style="font-size:11px;color:var(--orange-dark);margin-top:5px">Remembered for this category next time.</p></div></div><div style="margin-top:12px"><label class="flabel">Receipt Photo <span class="opt">(saved in backup)</span></label><div class="photoup" id="photo-drop" onclick="document.getElementById(\'f-photo\').click()"><span class="pic">&#x1F4F7;</span><p>Tap to take or upload receipt</p><img id="photo-prev" class="prev-img" style="display:none"></div><input type="file" id="f-photo" accept="image/*" capture="environment" onchange="onPhoto(this)"></div><div style="margin-top:10px"><div class="cbrow" id="row-paid" onclick="tog(\'cb-paid\',\'row-paid\')"><div class="cbvis">&#x2713;</div><span class="cblbl">Mark as Paid</span></div></div><div style="height:14px"></div><button class="btn btn-p btn-f" onclick="saveExpense()">Save Expense</button>';
+}
+function togPct(){pctOn=!pctOn;var row=document.getElementById("row-pct"),wrap=document.getElementById("pct-wrap");if(row)row.classList.toggle("on",pctOn);if(wrap)wrap.style.display=pctOn?"block":"none";}
+function onDesc(val){var k=val.trim().toLowerCase();if(S.wpm[k]!==undefined&&!pctOn){pctOn=true;var row=document.getElementById("row-pct"),wrap=document.getElementById("pct-wrap");if(row)row.classList.add("on");if(wrap)wrap.style.display="block";var pi=document.getElementById("f-pct");if(pi)pi.value=S.wpm[k];}}
+function onPhoto(input){if(!input.files.length)return;var r=new FileReader();r.onload=function(e){photoData=e.target.result;var prev=document.getElementById("photo-prev"),drop=document.getElementById("photo-drop");prev.src=photoData;prev.style.display="block";drop.querySelector("p").textContent="\u2713 Receipt saved \u2014 will be included in backup";drop.classList.add("has");};r.readAsDataURL(input.files[0]);}
+function saveExpense(){
+  var date=document.getElementById("f-date").value,desc=document.getElementById("f-desc").value.trim();
+  var amount=document.getElementById("f-amt").value,gst=document.getElementById("f-gst").value==="yes";
+  var cap=document.getElementById("cb-cap")&&document.getElementById("cb-cap").checked||false;
+  var paid=document.getElementById("cb-paid")&&document.getElementById("cb-paid").checked||false;
+  if(!date||!desc||!amount){toast("\u26A0\uFE0F Fill in Date, Description and Amount");return;}
+  var wp=100;
+  if(pctOn){wp=Number(document.getElementById("f-pct").value);if(!wp||wp<1||wp>100){toast("\u26A0\uFE0F Enter a valid work % (1\u2013100)");return;}S.wpm[desc.toLowerCase()]=wp;}
+  pctOn=false;
+  S.expenses.push({id:genId(),date:date,desc:desc,amount:Number(amount),gst:gst,cap:cap,wp:wp,paid:paid,receipt:photoData||null});
+  photoData=null;save();closeModal();render();toast("\u2713 Expense saved");
+}
+
+render();
+</script>
+</body>
+</html>
